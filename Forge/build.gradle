@@ -124,20 +124,12 @@ publishing {
             groupId project.group
             artifactId project.archivesBaseName
             version project.version
-            artifact jar
+            from components.java
+            jarJar.component(it)
         }
     }
     repositories {
         mavenLocal()
-    }
-}
-
-afterEvaluate {
-    tasks.jarJar {
-        archiveClassifier = ''
-    }
-    jar {
-        archiveClassifier = 'partial'
     }
 }
 

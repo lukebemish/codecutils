@@ -1,7 +1,27 @@
 /*
-
-
-// DataFixerUpper is Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
+ * MIT License
+ *
+ * Copyright (c) 2022 Luke Bemish
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ * // DataFixerUpper is Copyright (c) Microsoft Corporation. All rights reserved. Licensed under the MIT license.
  */
 
 package io.github.lukebemish.codecutils.api;
@@ -12,6 +32,7 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.MapLike;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
@@ -100,9 +121,10 @@ public class JanksonOps implements CommentingOps<JsonElement> {
 
     @Override
     public DataResult<JsonElement> mergeToList(JsonElement list, JsonElement value) {
-        if (list instanceof JsonArray array) {
+        if (list instanceof JsonArray || list == empty()) {
             JsonArray result = new JsonArray();
             if (list != empty()) {
+                JsonArray array = (JsonArray) list;
                 result.addAll(array);
             }
             result.add(value);
@@ -113,9 +135,10 @@ public class JanksonOps implements CommentingOps<JsonElement> {
 
     @Override
     public DataResult<JsonElement> mergeToList(final JsonElement list, final List<JsonElement> values) {
-        if (list instanceof JsonArray array) {
+        if (list instanceof JsonArray || list == empty()) {
             JsonArray result = new JsonArray();
             if (list != empty()) {
+                JsonArray array = (JsonArray) list;
                 result.addAll(array);
             }
             result.addAll(values);
@@ -126,25 +149,31 @@ public class JanksonOps implements CommentingOps<JsonElement> {
 
     @Override
     public DataResult<JsonElement> mergeToMap(JsonElement map, JsonElement key, JsonElement value) {
-        if (!(map instanceof JsonObject jsonObject)) {
+        if (!(map instanceof JsonObject) && map != empty()) {
             return DataResult.error("mergeToMap called with not a map: " + map, map);
         }
         if (!(key instanceof JsonPrimitive primitive) || !(primitive.getValue() instanceof String string)) {
             return DataResult.error("key is not a string: " + key, map);
         }
         JsonObject output = new JsonObject();
-        output.putAll(jsonObject);
+        if (map != empty()) {
+            JsonObject jsonObject = (JsonObject) map;
+            output.putAll(jsonObject);
+        }
         output.put(string, value);
         return DataResult.success(output);
     }
 
     @Override
     public DataResult<JsonElement> mergeToMap(JsonElement map, MapLike<JsonElement> values) {
-        if (!(map instanceof JsonObject jsonObject)) {
+        if (!(map instanceof JsonObject) && map != empty()) {
             return DataResult.error("mergeToMap called with not a map: " + map, map);
         }
         JsonObject output = new JsonObject();
-        output.putAll(jsonObject);
+        if (map != empty()) {
+            JsonObject jsonObject = (JsonObject) map;
+            output.putAll(jsonObject);
+        }
         List<JsonElement> missed = new ArrayList<>();
         values.entries().forEach(entry -> {
             if (entry.getFirst() instanceof JsonPrimitive primitive && primitive.getValue() instanceof String string)
@@ -157,6 +186,41 @@ public class JanksonOps implements CommentingOps<JsonElement> {
         }
 
         return DataResult.success(output);
+    }
+
+    @Override
+    public DataResult<MapLike<JsonElement>> getMap(final JsonElement input) {
+        if (!(input instanceof JsonObject object)) {
+            return DataResult.error("Not a JSON object: " + input);
+        }
+        return DataResult.success(new MapLike<>() {
+            @Nullable
+            @Override
+            public JsonElement get(JsonElement key) {
+                if (key instanceof JsonPrimitive primitive && primitive.getValue() instanceof String string) return get(string);
+                return null;
+            }
+
+            @Nullable
+            @Override
+            public JsonElement get(String key) {
+                JsonElement element = object.get(key);
+                if (element instanceof JsonNull) {
+                    return null;
+                }
+                return element;
+            }
+
+            @Override
+            public Stream<Pair<JsonElement, JsonElement>> entries() {
+                return object.entrySet().stream().map(e -> Pair.of(new JsonPrimitive(e.getKey()), e.getValue()));
+            }
+
+            @Override
+            public String toString() {
+                return "MapLike[" + object + "]";
+            }
+        });
     }
 
     @Override

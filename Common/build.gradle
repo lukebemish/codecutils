@@ -5,6 +5,15 @@ plugins {
 
 archivesBaseName = "${mod_id}-common-${minecraft_version}"
 
+license {
+    matching('**/NightConfigOps.java') {
+        header = rootProject.file('attribution/databuddy_header')
+    }
+    matching('**/JanksonOps.java') {
+        header = rootProject.file('attribution/datafixer_header')
+    }
+}
+
 repositories {
     maven {
         name = 'Forge / Mixin'
