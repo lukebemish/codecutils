@@ -13,14 +13,14 @@ Description here
 '''
 # logoFile = "icon.png"
 
-[[dependencies.excavated_variants]]
+[[dependencies.codecutils]]
 modId = "forge"
 mandatory = true
-versionRange = "[41.0.17,)"
+versionRange = "[41.0.94,)"
 ordering = "NONE"
 side = "BOTH"
 
-[[dependencies.excavated_variants]]
+[[dependencies.codecutils]]
 modId = "minecraft"
 mandatory = true
 versionRange = "[1.19,)"
