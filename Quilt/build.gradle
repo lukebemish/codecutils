@@ -64,10 +64,6 @@ loom {
 			runDir("runserver")
 		}
 	}
-
-	mixin {
-		defaultRefmapName = "excavated_variants.refmap.json"
-	}
 }
 
 processResources {
