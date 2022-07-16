@@ -98,8 +98,6 @@ dependencies {
 
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 
-    compileOnly(fg.deobf("curse.maven:hyle-609850:3748968"))
-
     jarJar(group: "blue.endless", name: "jankson", version:"[$project.jankson_version,)")
 }
 
