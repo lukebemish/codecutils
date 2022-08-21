@@ -30,8 +30,11 @@ subprojects {
                 'Build-On-Minecraft'      : minecraft_version
             ])
         }
+        from("$rootDir/LICENSE") {
+            rename { "${it}_${mod_name}"}
+        }
     }
-    
+
     repositories {
         mavenCentral()
 

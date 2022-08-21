@@ -21,20 +21,9 @@ repositories {
     }
 }
 
-jar {
-    classifier null
-    getDestinationDirectory().set(new File(project.getBuildDir(),"libs"))
-}
-
 loom {
-    remapArchives = false
-    setupRemappedVariants = false
-    enableTransitiveAccessWideners = false
     runConfigs.configureEach {
         ideConfigGenerated = false
-    }
-    interfaceInjection {
-        enableDependencyInterfaceInjection = false
     }
 }
 
@@ -53,14 +42,19 @@ dependencies {
     modCompileOnly("org.quiltmc:quilt-loader:${quilt_loader_version}")
 }
 
+import net.fabricmc.loom.task.AbstractRemapJarTask
+tasks.withType(AbstractRemapJarTask).each {
+    it.targetNamespace = "named"
+}
+
 processResources {
     def buildProps = project.properties.clone()
 
     filesMatching(['pack.mcmeta']) {
-
         expand buildProps
     }
 }
+
 publishing {
     publications {
         mavenJava(MavenPublication) {
@@ -68,14 +62,9 @@ publishing {
             artifactId project.archivesBaseName
             version project.version
             from components.java
-            artifact sourcesJar
         }
     }
 
     repositories {
-        mavenLocal()
     }
 }
-
-remapJar.enabled = false
-remapSourcesJar.enabled = false
