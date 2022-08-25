@@ -1,6 +1,13 @@
 plugins {
     id 'org.cadixdev.licenser' version '0.6.1' apply false
+    id 'io.github.groovymc.modsdotgroovy' version '1.0.5'
 }
+
+modsDotGroovy {
+    dslVersion = '1.0.3'
+    platform 'multiloader'
+}
+
 subprojects {
 
     apply plugin: 'java'
@@ -31,11 +38,12 @@ subprojects {
             ])
         }
         from("$rootDir/LICENSE") {
-            rename { "${it}_${mod_name}"}
+            rename { "${it}_${mod_id}"}
         }
     }
 
     repositories {
+        mavenLocal()
         mavenCentral()
 
         maven {
