@@ -1,7 +1,9 @@
 pluginManagement {
 
     repositories {
-        
+
+        mavenLocal()
+
         maven {
         
             name = 'Fabric'
@@ -33,7 +35,6 @@ pluginManagement {
 
         mavenCentral()
         gradlePluginPortal()
-        mavenLocal()
     }
 }
 
